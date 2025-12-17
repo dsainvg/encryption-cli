@@ -1,7 +1,7 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -O2 -Iinclude
+CXX = g++
+CXXFLAGS = -Wall -Wextra -O2 -std=c++17 -Iinclude
 
-SRC = src/main.c src/cli.c src/crypto.c src/utils.c
+SRC = src/main.cpp src/cli.cpp src/crypto.cpp src/utils.cpp
 OBJ = build/obj/main.o build/obj/cli.o build/obj/crypto.o build/obj/utils.o
 EXE = build/mycrypt-cli.exe
 TEST_OBJ = build/obj/test_crypto.o build/obj/crypto.o build/obj/utils.o
@@ -13,17 +13,17 @@ build/obj:
 	if not exist build mkdir build
 	if not exist build\obj mkdir build\obj
 
-build/obj/%.o: src/%.c include/*.h
-	$(CC) $(CFLAGS) -c $< -o $@
+build/obj/%.o: src/%.cpp include/*.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-build/obj/test_crypto.o: tests/test_crypto.c include/*.h
-	$(CC) $(CFLAGS) -c tests/test_crypto.c -o $@
+build/obj/test_crypto.o: tests/test_crypto.cpp include/*.h
+	$(CXX) $(CXXFLAGS) -c tests/test_crypto.cpp -o $@
 
 $(EXE): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@
+	$(CXX) $(CXXFLAGS) $(OBJ) -ladvapi32 -o $@
 
 $(TEST_EXE): $(TEST_OBJ)
-	$(CC) $(CFLAGS) $(TEST_OBJ) -o $@
+	$(CXX) $(CXXFLAGS) $(TEST_OBJ) -ladvapi32 -o $@
 
 test: $(TEST_EXE)
 	$(TEST_EXE)

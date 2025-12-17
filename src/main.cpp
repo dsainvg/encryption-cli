@@ -13,20 +13,18 @@ int main(int argc, char *argv[]) {
     // Handle hash command
     if (strcmp(argv[1], "hash") == 0) {
         if (argc < 3) {
-            printf("Usage: %s hash <password>\n", argv[0]);
+            printf("Usage: %s hash <password> [cost] [salt]\n", argv[0]);
             return 1;
         }
-        unsigned char hash[64];
-        size_t hash_len = sizeof(hash);
-        if (hash_password(argv[2], hash, &hash_len) != 0) {
+        int cost = (argc >= 4) ? atoi(argv[3]) : 10;
+        const char *salt = (argc >= 5) ? argv[4] : NULL;
+        char *hash = hash_password(argv[2], cost, salt);
+        if (!hash) {
             printf("Error hashing password\n");
             return 1;
         }
-        printf("Hash: ");
-        for (size_t i = 0; i < hash_len; i++) {
-            printf("%02x", hash[i]);
-        }
-        printf("\n");
+        printf("Hash: %s\n", hash);
+        free(hash);
         return 0;
     }
     
@@ -46,9 +44,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    unsigned char hash[64];
-    size_t hash_len = sizeof(hash);
-    if (hash_password(args.password, hash, &hash_len) != 0) {
+    char *hash = hash_password(args.password, 10, NULL);
+    if (!hash) {
         printf("Error hashing password\n");
         return 1;
     }
@@ -66,14 +63,14 @@ int main(int argc, char *argv[]) {
     
     int rc;
     if (strcmp(args.command, "encrypt") == 0) {
-        rc = encrypt_file(args.filepath, output_file, hash, hash_len);
+        rc = encrypt_file(args.filepath, output_file, (unsigned char*)hash, strlen(hash));
         if (rc == 0) {
             printf("File encrypted: %s\n", output_file);
         } else {
             printf("Encryption failed\n");
         }
     } else if (strcmp(args.command, "decrypt") == 0) {
-        rc = decrypt_file(args.filepath, output_file, hash, hash_len);
+        rc = decrypt_file(args.filepath, output_file, (unsigned char*)hash, strlen(hash));
         if (rc == 0) {
             printf("File decrypted: %s\n", output_file);
         } else {
@@ -81,8 +78,11 @@ int main(int argc, char *argv[]) {
         }
     } else {
         printf("Unknown command: %s\n", args.command);
+        free(hash);
         return 1;
     }
+    
+    free(hash);
     
     free_args(&args);
     return rc;

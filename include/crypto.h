@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-int hash_password(const char *password, unsigned char *hash, size_t *hash_len);
+char* hash_password(const char *password, int cost, const char *salt);
 
 int encrypt_file(const char *input_file, const char *output_file, const unsigned char *key, size_t key_len);
 

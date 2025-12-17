@@ -3,3 +3,12 @@ build/
 *.a
 *.exe
 .DS_Store
+*.log
+.vscode/
+.amazonq/
+vcpkg_installed/
+lib/
+include/zip.h
+include/zipconf.h
+fails/
+largefile.*

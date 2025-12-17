@@ -25,8 +25,11 @@ static void get_random_bytes(uint8_t *buffer, size_t len) {
     CryptReleaseContext(hProv, 0);
 #else
     int fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buffer, len);
-    close(fd);
+    if (fd >= 0) {
+        ssize_t result = read(fd, buffer, len);
+        (void)result;
+        close(fd);
+    }
 #endif
 }
 
@@ -186,7 +189,7 @@ char* hash_password(const char *password, int cost, const char *salt) {
         password_tuple.push_back(std::get<4>(hash_result));
         password_tuple.push_back(std::get<5>(hash_result));
 
-        if (memo.size() < (16 * (i + 1))) memo.resize(16 * (i + 1));
+        if (memo.size() < static_cast<size_t>(16 * (i + 1))) memo.resize(16 * (i + 1));
         memo[16 * i + 0] = password_tuple[0];
         memo[16 * i + 1] = password_tuple[1];
         memo[16 * i + 2] = password_tuple[2];

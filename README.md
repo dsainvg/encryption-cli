@@ -7,7 +7,12 @@ Terminal program for file encryption/decryption with custom password hashing alg
 - Custom iterative password hashing with configurable cost factor
 - Cryptographically secure random salt generation (Windows CryptGenRandom)
 - Deterministic hashing when salt is provided
-- XOR-based file encryption/decryption
+- Advanced file encryption with:
+  - Byte manipulation (rotate + XOR)
+  - Intelligent chunk sizing based on file size
+  - Parallel processing for large files
+  - ZIP compression (LZMA)
+  - Password verification (hash of hash)
 - Cost factor 8-14 recommended (256 to 16384 iterations)
 
 ## Usage
@@ -24,14 +29,19 @@ mycrypt-cli encrypt <filepath> <password> [output_file]
 mycrypt-cli decrypt <filepath> <password> [output_file]
 ```
 
+## Dependencies
+
+- libzip (for ZIP compression)
+
+See [docs/SETUP.md](docs/SETUP.md) for installation instructions.
+
 ## Build
 
 ```bash
 make
-# Or manually:
-gcc -Wall -Wextra -O2 -Iinclude -c src/*.c
-gcc *.o -ladvapi32 -o mycrypt-cli.exe
 ```
+
+See [BUILD.md](BUILD.md) for detailed build instructions.
 
 ## Examples
 
@@ -52,8 +62,18 @@ gcc *.o -ladvapi32 -o mycrypt-cli.exe
 ## Test
 
 ```bash
-# Run comprehensive hash tests (30 tests)
-cmd /c hash_tests.bat
+# Run all unit tests (190 tests: 80 hash + 110 encryption)
+make test
+
+# Run hash tests only (80 tests)
+make test-hs
+
+# Run encryption tests only (110 tests)
+make test-en
+
+# Run executable integration tests (15 tests)
+chmod +x tests.sh
+./tests.sh
 ```
 
 ## Algorithm
@@ -64,3 +84,11 @@ Custom password hashing algorithm matching the Python/C++ implementation:
 - Latin-1 to UTF-8 encoding conversion
 - Memoization for iterative strengthening
 - Output format: `$salt$/$hash` or `$salt$/$hash2$hash4`
+
+## Documentation
+
+Detailed documentation available in [docs/](docs/) folder:
+- [QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide
+- [SETUP.md](docs/SETUP.md) - Installation instructions
+- [IMPLEMENTATION.md](docs/IMPLEMENTATION.md) - Technical details
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - System design

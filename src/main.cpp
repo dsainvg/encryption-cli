@@ -1,5 +1,6 @@
 #include "cli.h"
 #include "crypto.h"
+#include "encryption.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -44,12 +45,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    char *hash = hash_password(args.password, 10, NULL);
-    if (!hash) {
-        printf("Error hashing password\n");
-        return 1;
-    }
-    
     char output_file[256];
     if (args.output_file) {
         strcpy(output_file, args.output_file);
@@ -63,26 +58,25 @@ int main(int argc, char *argv[]) {
     
     int rc;
     if (strcmp(args.command, "encrypt") == 0) {
-        rc = encrypt_file(args.filepath, output_file, (unsigned char*)hash, strlen(hash));
+        rc = encrypt_file_advanced(args.filepath, output_file, args.password, 10);
         if (rc == 0) {
             printf("File encrypted: %s\n", output_file);
         } else {
             printf("Encryption failed\n");
         }
     } else if (strcmp(args.command, "decrypt") == 0) {
-        rc = decrypt_file(args.filepath, output_file, (unsigned char*)hash, strlen(hash));
+        rc = decrypt_file_advanced(args.filepath, output_file, args.password);
         if (rc == 0) {
             printf("File decrypted: %s\n", output_file);
+        } else if (rc == -2) {
+            printf("Decryption failed: Wrong password\n");
         } else {
             printf("Decryption failed\n");
         }
     } else {
         printf("Unknown command: %s\n", args.command);
-        free(hash);
         return 1;
     }
-    
-    free(hash);
     
     free_args(&args);
     return rc;
